@@ -30,6 +30,7 @@ public class FilterPage extends BasePage {
     }
 
     public void filterByBlackColor() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(productItems));
         WebElement productBefore = driver.findElements(productItems).get(0);
 
         WebElement blackFilter = wait.until(ExpectedConditions.presenceOfElementLocated(blackColorFilter));
@@ -42,17 +43,14 @@ public class FilterPage extends BasePage {
 
     public boolean allProductsShowBlackSwatchWithBlueBorder() {
         List<WebElement> products = driver.findElements(productItems);
-        for (int i = 0; i < products.size(); i++) {
-            WebElement product = driver.findElements(productItems).get(i);
+        for (WebElement product : products) {
             scrollIntoView(product);
-
             try {
                 WebElement swatch = product.findElement(By.cssSelector(".swatch-link.has-image"));
                 String borderColor = swatch.getCssValue("border-top-color");
                 System.out.println("Swatch border: " + borderColor);
 
-                boolean isBlue = borderColor.contains("51, 153, 204");
-                if (!isBlue) return false;
+                if (!borderColor.contains("51, 153, 204")) return false;
             } catch (NoSuchElementException | StaleElementReferenceException e) {
                 return false;
             }
@@ -65,8 +63,22 @@ public class FilterPage extends BasePage {
         scrollIntoView(price);
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", price);
 
-        wait.until(ExpectedConditions.numberOfElementsToBeLessThan(productItems, 5));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(productItems));
+        wait.until(driver -> {
+            List<WebElement> products = driver.findElements(productItems);
+            if (products.size() == 0) return false;
+
+            for (WebElement product : products) {
+                try {
+                    WebElement priceEl = product.findElement(By.cssSelector(".price-box .price"));
+                    String priceText = priceEl.getText().replace("$", "").trim();
+                    double priceVal = Double.parseDouble(priceText);
+                    if (priceVal < 70.0) return false;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     public boolean isProductCountCorrect() {
@@ -77,16 +89,13 @@ public class FilterPage extends BasePage {
     public boolean allProductPricesAreAbove70() {
         List<WebElement> items = driver.findElements(productItems);
 
-        for (int i = 0; i < items.size(); i++) {
-            WebElement product = driver.findElements(productItems).get(i);
+        for (WebElement product : items) {
             scrollIntoView(product);
-
             try {
                 WebElement priceEl = product.findElement(By.cssSelector(".price-box .price"));
                 String priceText = priceEl.getText().replace("$", "").trim();
                 double price = Double.parseDouble(priceText);
                 System.out.println("Product Price: $" + price);
-
                 if (price < 70.00) return false;
             } catch (NoSuchElementException | NumberFormatException e) {
                 return false;
@@ -98,9 +107,14 @@ public class FilterPage extends BasePage {
     private void scrollIntoView(WebElement element) {
         try {
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'})", element);
-            Thread.sleep(200);
+            wait.until(ExpectedConditions.refreshed(
+                    ExpectedConditions.and(
+                            ExpectedConditions.visibilityOf(element),
+                            ExpectedConditions.elementToBeClickable(element)
+                    )
+            ));
         } catch (StaleElementReferenceException e) {
             System.out.println("Element went stale before scrolling. Skipping scroll.");
-        } catch (InterruptedException ignored) {}
+        }
     }
 }

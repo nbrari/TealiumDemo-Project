@@ -15,7 +15,7 @@ import java.util.Date;
 
 public class BaseTest {
     protected WebDriver driver;
-    protected static String registeredEmail = "alice@gmail.com";
+    protected static String registeredEmail = "nadia12121@gmail.com";
     protected static final String password = "Test1234!";
 
     @BeforeMethod

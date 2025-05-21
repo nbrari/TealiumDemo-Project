@@ -1,3 +1,4 @@
+//Test n.7
 package tests;
 
 import base.BaseTest;
@@ -21,7 +22,7 @@ public class WishListToCartTest extends BaseTest {
         wishlistPage.goToWishlist();
 
         if (wishlistPage.getWishlistItemCount() == 2) {
-            String[] colorsPriority = {"pink", "black", "white", "yellow"};
+            String[] colorsPriority = {"pink", "black", "white"};
             wishlistPage.handleWishlistItem(0, colorsPriority, "s");
             wishlistPage.clickContinueShopping();
             wishlistPage.goToWishlist();

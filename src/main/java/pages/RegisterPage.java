@@ -17,6 +17,7 @@ public class RegisterPage extends BasePage {
     private By successMessage = By.cssSelector("li.success-msg span");
 
     public RegisterPage(WebDriver driver) {
+
         super(driver);
     }
 

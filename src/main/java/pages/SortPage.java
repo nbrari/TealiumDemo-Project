@@ -18,7 +18,6 @@ public class SortPage extends BasePage {
     private By addToWishlistButtons = By.cssSelector(".link-wishlist");
 
     public SortPage(WebDriver driver) {
-
         super(driver);
     }
 
@@ -32,7 +31,6 @@ public class SortPage extends BasePage {
         WebElement submenu = wait.until(ExpectedConditions.elementToBeClickable(viewAllWomen));
         submenu.click();
     }
-
 
     public void sortByPrice() {
         WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(sortByDropdown));
@@ -50,19 +48,27 @@ public class SortPage extends BasePage {
 
         wait.until(ExpectedConditions.urlContains("order=price"));
         wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(finalPrices));
+        wait.until(driver -> {
+            List<WebElement> prices = driver.findElements(finalPrices);
+            if (prices.size() < 2) return false;
 
-        List<WebElement> prices = driver.findElements(finalPrices);
-        if (!prices.isEmpty()) {
-            js.executeScript("arguments[0].scrollIntoView({block: 'center'});", prices.get(0));
-        }
+            try {
+                List<Double> priceValues = prices.stream()
+                        .map(WebElement::getText)
+                        .map(text -> text.replaceAll("[$,]", "").trim())
+                        .filter(text -> !text.isEmpty())
+                        .map(Double::parseDouble)
+                        .collect(Collectors.toList());
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ignored) {}
+                for (int i = 0; i < priceValues.size() - 1; i++) {
+                    if (priceValues.get(i) > priceValues.get(i + 1)) return false;
+                }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
-
-
-
 
     public List<Double> getDisplayedProductPrices() {
         wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(finalPrices));
@@ -104,12 +110,10 @@ public class SortPage extends BasePage {
                 }
 
             } catch (StaleElementReferenceException | TimeoutException e) {
-                System.out.println("⚠️ Failed to add product " + (i + 1) + " to wishlist: " + e.getMessage());
+                System.out.println("Failed to add product " + (i + 1) + " to wishlist: " + e.getMessage());
             }
         }
     }
-
-
 
     public String getWishlistCountFromAccount() {
         try {
@@ -141,5 +145,4 @@ public class SortPage extends BasePage {
             throw new RuntimeException("Failed to get wishlist count", e);
         }
     }
-
 }

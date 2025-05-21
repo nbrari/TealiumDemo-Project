@@ -8,6 +8,7 @@ import java.util.List;
 public class CartPage extends BasePage {
 
     public CartPage(WebDriver driver) {
+
         super(driver);
     }
 
@@ -28,6 +29,7 @@ public class CartPage extends BasePage {
     }
 
     public int getItemCount() {
+
         return driver.findElements(cartItems).size();
     }
 
@@ -43,6 +45,7 @@ public class CartPage extends BasePage {
     }
 
     public boolean isCartEmpty() {
+
         return driver.findElements(emptyCartMessage).size() > 0;
     }
 }

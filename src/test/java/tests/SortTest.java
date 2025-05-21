@@ -1,3 +1,4 @@
+//Test n.6
 package tests;
 
 import base.BaseTest;

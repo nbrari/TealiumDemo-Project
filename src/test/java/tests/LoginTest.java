@@ -1,3 +1,4 @@
+//Test n.2
 package tests;
 
 import base.BaseTest;
@@ -17,7 +18,7 @@ public class LoginTest extends BaseTest {
         loginPage.login(registeredEmail, password);
 
         String username = homePage.getLoggedInUserName();
-        Assert.assertTrue(username.toLowerCase().contains("alice"),
+        Assert.assertTrue(username.toLowerCase().contains("nadia"),
                 "Logged-in username not correct or missing. Found: " + username);
 
         homePage.logoutFromAccount();

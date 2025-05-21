@@ -14,7 +14,6 @@ public class HoverPage extends BasePage {
 
         super(driver);
     }
-
     public void navigateToWomanCategory() {
         Actions actions = new Actions(driver);
         WebElement menu = wait.until(ExpectedConditions.visibilityOfElementLocated(womanMenu));

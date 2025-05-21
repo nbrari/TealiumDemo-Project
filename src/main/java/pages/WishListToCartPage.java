@@ -46,7 +46,7 @@ public class WishListToCartPage extends BasePage {
             WebElement editButton = editList.get(index);
 
             if (!editButton.isEnabled() || editButton.getAttribute("class").contains("disabled")) {
-                System.out.println("ℹNo configuration needed for item " + (index + 1));
+                System.out.println("No configuration needed for item " + (index + 1));
                 List<WebElement> addButtons = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(wishlistAddToCartButtons));
 
                 if (index >= addButtons.size()) {
@@ -124,46 +124,55 @@ public class WishListToCartPage extends BasePage {
     }
 
     public void goToCart() {
+
         wait.until(ExpectedConditions.elementToBeClickable(cartIcon)).click();
     }
 
     public void updateQuantityToTwo() {
         WebElement qty = wait.until(ExpectedConditions.visibilityOfElementLocated(qtyInput));
+
         qty.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         qty.sendKeys("2");
 
         WebElement updateBtn = wait.until(ExpectedConditions.elementToBeClickable(qtyUpdateButton));
         ((JavascriptExecutor) driver).executeScript("arguments[0].removeAttribute('disabled')", updateBtn);
         updateBtn.click();
+
+        By spinner = By.cssSelector(".loading-mask");
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(spinner));
+        wait.until(driver -> qty.getAttribute("value").equals("2"));
     }
 
     public boolean verifyTotalPrice() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".block-content .price")));
+        By spinner = By.cssSelector(".loading-mask");
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(spinner));
 
-        List<WebElement> items = driver.findElements(By.cssSelector("#cart-sidebar .item"));
-        double sum = 0.0;
+        return wait.until(driver -> {
+            List<WebElement> items = driver.findElements(By.cssSelector("#cart-sidebar .item"));
+            double calculatedTotal = 0.0;
 
-        for (WebElement item : items) {
-            try {
-                WebElement priceElement = item.findElement(By.cssSelector(".price"));
-                String priceText = priceElement.getText().replace("$", "").replace(",", "").trim();
-                double price = Double.parseDouble(priceText);
+            for (WebElement item : items) {
+                try {
+                    String priceText = item.findElement(By.cssSelector(".price")).getText().replace("$", "").replace(",", "").trim();
+                    double price = Double.parseDouble(priceText);
 
-                WebElement qtyElement = item.findElement(By.cssSelector("input.qty.cart-item-quantity"));
-                String qtyText = qtyElement.getAttribute("value").trim();
-                int quantity = Integer.parseInt(qtyText);
+                    String qtyText = item.findElement(By.cssSelector("input.qty.cart-item-quantity")).getAttribute("value").trim();
+                    int qty = Integer.parseInt(qtyText);
 
-                sum += price * quantity;
-            } catch (Exception e) {
-                System.out.println("Failed to parse item price or quantity: " + e.getMessage());
+                    calculatedTotal += price * qty;
+                } catch (Exception e) {
+                    return false;
+                }
             }
-        }
 
-        String totalText = driver.findElement(By.cssSelector(".block-content .price")).getText().replace("$", "").replace(",", "").trim();
-        double total = Double.parseDouble(totalText);
+            WebElement totalElement = driver.findElement(By.cssSelector(".block-content .price"));
+            String displayedText = totalElement.getText().replace("$", "").replace(",", "").trim();
+            double displayedTotal = Double.parseDouble(displayedText);
 
-        System.out.println("Expected Total: $" + sum + " | Displayed Total: $" + total);
-        return Math.abs(sum - total) < 0.01;
+            System.out.println("Expected Total: $" + calculatedTotal + " | Displayed: $" + displayedTotal);
+
+            return Math.abs(calculatedTotal - displayedTotal) < 0.01;
+        });
     }
 }
 

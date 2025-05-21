@@ -1,3 +1,4 @@
+//Test n.1
 package tests;
 
 import base.BaseTest;
@@ -14,7 +15,7 @@ public class RegisterTest extends BaseTest {
         homePage.goToRegisterPage();
 
         RegisterPage registerPage = new RegisterPage(driver);
-        registerPage.fillRegistrationForm("Alice", "Smith", registeredEmail, password, password);
+        registerPage.fillRegistrationForm("Nadia", "Bbbb", registeredEmail, password, password);
 
         String successMsg = registerPage.getSuccessMessage();
         Assert.assertTrue(successMsg.toLowerCase().contains("thank you") || successMsg.toLowerCase().contains("registered"),

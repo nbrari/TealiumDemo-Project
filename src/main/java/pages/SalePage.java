@@ -33,7 +33,7 @@ public class SalePage extends BasePage {
         List<String> failures = new ArrayList<>();
 
         if (products.isEmpty()) {
-            failures.add("No sale products found on the page.");
+            failures.add("No sale products found.");
             return failures;
         }
 
